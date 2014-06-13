@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+<meta charset="UTF-8">
+<title>quadra</title>
+<script type="text/javascript">
+console.log("Welcome!");
+
+var api = {
+  delay: 500,
+  paused: false,
+  over: false,
+  timeout: null,
+  context: null,
+  base: 10,
+  height: 30,
+  space: [],
+  spawner: {newFigure: null},
+  position: {x:0, y:0},
+  rotation: 0,
+  type: 0,
+  typeColor: ["pink", "cyan", "red", "yellow", "blue", "orange", "green", "black"],
+  figure: null,
+  figures: [],
+  tick: null,
+  moveLeft: null,
+  moveRight: null,
+  moveDown: null,
+  rotateLeft: null,
+  rotateRight: null,
+  loop: null,
+  gx: null,
+  gy: null,
+  checkPoints: null
+};
+
+api.figures = [
+  [ function(x,y) { return [[x+0,y+0],[x+1,y+1],[x+1,y+0],[x+0,y+1]]; },
+    function(x,y) { return [[x+0,y+0],[x+1,y+1],[x+1,y+0],[x+0,y+1]]; },
+    function(x,y) { return [[x+0,y+0],[x+1,y+1],[x+1,y+0],[x+0,y+1]]; },
+    function(x,y) { return [[x+0,y+0],[x+1,y+1],[x+1,y+0],[x+0,y+1]]; },
+  ],
+  [ function(x,y) { return [[x+0,y+0],[x-1,y+0],[x+1,y+0],[x+1,y+1]]; },
+    function(x,y) { return [[x+0,y+0],[x+0,y-1],[x+0,y+1],[x-1,y+1]]; },
+    function(x,y) { return [[x+0,y+0],[x-1,y+0],[x+1,y+0],[x-1,y-1]]; },
+    function(x,y) { return [[x+0,y+0],[x+0,y-1],[x+0,y+1],[x+1,y-1]]; },
+  ],
+  [ function(x,y) { return [[x+0,y+0],[x+0,y-1],[x+0,y+1],[x+0,y+2]]; },
+    function(x,y) { return [[x+0,y+0],[x+1,y+0],[x-1,y+0],[x-2,y+0]]; },
+    function(x,y) { return [[x+0,y+0],[x+0,y-1],[x+0,y+1],[x+0,y-2]]; },
+    function(x,y) { return [[x+0,y+0],[x+1,y+0],[x-1,y+0],[x+2,y+0]]; },
+  ],
+  //T
+  [ function(x,y) { return [[x+0,y+0],[x-1,y+0],[x+1,y+0],[x+0,y+1]]; },
+    function(x,y) { return [[x+0,y+0],[x+0,y-1],[x+0,y+1],[x-1,y+0]]; },
+    function(x,y) { return [[x+0,y+0],[x-1,y+0],[x+1,y+0],[x+0,y-1]]; },
+    function(x,y) { return [[x+0,y+0],[x+0,y-1],[x+0,y+1],[x+1,y+0]]; },
+  ],
+  //L
+  [ function(x,y) { return [[x+0,y+0],[x-1,y+0],[x+1,y+0],[x+1,y-1]]; },
+    function(x,y) { return [[x+0,y+0],[x+0,y-1],[x+0,y+1],[x+1,y+1]]; },
+    function(x,y) { return [[x+0,y+0],[x-1,y+0],[x+1,y+0],[x-1,y+1]]; },
+    function(x,y) { return [[x+0,y+0],[x+0,y-1],[x+0,y+1],[x-1,y-1]]; },
+  ],
+  //S
+  [ function(x,y) { return [[x+0,y+0],[x+0,y+1],[x-1,y+1],[x+1,y+0]]; },
+    function(x,y) { return [[x+0,y+0],[x-1,y-1],[x-1,y+0],[x+0,y+1]]; },
+    function(x,y) { return [[x+0,y+0],[x+0,y+1],[x-1,y+1],[x+1,y+0]]; },
+    function(x,y) { return [[x+0,y+0],[x-1,y-1],[x-1,y+0],[x+0,y+1]]; },
+  ],
+  //Z
+  [ function(x,y) { return [[x+0,y+0],[x+1,y+1],[x+0,y+1],[x-1,y+0]]; },
+    function(x,y) { return [[x+0,y+0],[x+0,y+1],[x+1,y+0],[x+1,y-1]]; },
+    function(x,y) { return [[x+0,y+0],[x+1,y+1],[x+0,y+1],[x-1,y+0]]; },
+    function(x,y) { return [[x+0,y+0],[x+0,y+1],[x+1,y+0],[x+1,y-1]]; },
+  ],
+];
+
+api.rotations = [1,2,3,0];
+
+api.nextRotation = function() {
+  return api.rotations[api.rotation];
+}
+
+api.spawner.newFigure = function() {
+  //pick a random figure!
+  api.type = Math.floor(7*Math.random());
+  //api.type = 6;
+  api.figure = api.figures[api.type][0];
+  //place it in line 0, 50%
+  api.position.x = api.base/2-1;
+  api.position.y = 0;
+  //rotation 0
+  api.rotation = 0;
+}
+
+api.erasePoint = function(x, y) {
+  api.context.fillStyle = "white";
+  api.context.fillRect(x*20, y*20, 20, 20);
+}
+
+api.drawPoint = function(x, y, c) {
+  api.context.fillStyle = api.typeColor[c];
+  api.context.fillRect(x*20, y*20, 20, 20);
+}
+
+api.reDrawLines = function() {
+  for(var j=0; j<api.height; j++) {
+    for(var i=0; i<api.base; i++) {
+      var p = api.space[i][j];
+      if(p == null)  {
+        api.erasePoint(i,j);
+      } else {
+        api.drawPoint(i,j,p);
+      }
+    }
+  }
+}
+
+api.erase = function() {
+  api.context.fillStyle = "white";
+  api.forPoints2(api.points(), function(p) {
+    api.context.fillRect(p[0]*20, p[1]*20, 20, 20);
+  });
+}
+
+api.draw = function() {
+  api.context.fillStyle = api.typeColor[api.type];
+  api.forPoints2(api.points(), function(p) {
+    api.context.fillRect(p[0]*20, p[1]*20, 20, 20);
+  });
+}
+
+api.gx = function() {
+  return api.position.x * 20;
+}
+api.gy = function() {
+  return api.position.y * 20;
+}
+
+api.initialize = function() {
+  for(var i=0; i<api.base; i++) {
+    api.space[i] = [];
+    for(var j=0; j<api.height; j++) {
+      api.space[i][j] = null;
+    }
+  }
+  api.spawner.newFigure();
+}
+
+api.tick = function() {
+  api.moveDown();
+}
+
+api.forPoints2 = function(points, callback) {
+  for(var i=0; i<points.length; i++) {
+    callback(points[i]);
+  }
+}
+
+api.checkPoints2 = function(points, callback) {
+  for(var i=0; i<points.length; i++) {
+    if(!callback(points[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+api.points = function() {
+  if(api.figure == null) return [];
+  return api.figure(api.position.x, api.position.y);
+}
+
+api.moveLeft = function() {
+  if(api.checkPoints2(api.points(), function(p) {
+    return ( (p[0] > 0)
+             && (api.space[p[0]-1][p[1]] == null)
+           );
+  } )) {
+    api.erase();
+    api.position.x = api.position.x-1;
+    api.draw();
+  }
+};
+
+api.moveRight = function(context) {
+  if(api.checkPoints2(api.points(), function(p) {
+    return ( (p[0]+1 < api.base)
+             && (api.space[p[0]+1][p[1]] == null)
+           ); } )) {
+    api.erase();
+    api.position.x = api.position.x+1;
+    api.draw();
+  }
+}
+
+api.canMoveDown = function() {
+  return api.checkPoints2(api.points(), function(p) {
+    return(
+      (api.space[p[0]][p[1]+1] == null) && (p[1]+1 < api.height)); } );
+
+}
+
+api.canAssignSpace = function() {
+  return(api.checkPoints2(api.points(), function(p) {
+    return(api.space[p[0]][p[1]] == null);
+  }));
+}
+
+api.assignSpace = function() {
+  api.forPoints2(api.points(), function(p) {
+    api.space[p[0]][p[1]] = api.type;
+  });
+}
+
+api.moveDown = function(context) {
+  if(api.canMoveDown()) {
+    api.erase();
+    api.position.y = api.position.y+1;
+    api.draw();
+    return true;
+  } else {
+    if(api.canAssignSpace()) {
+      api.assignSpace();
+      api.lines();
+      api.spawner.newFigure();
+      api.draw();
+
+    } else {
+      console.log("Game Over")
+      api.over = true;
+      api.pause();
+    }
+    return false;
+  }
+  // TODO draw should be here
+}
+
+api.moveDownLoop = function(context) {
+  while(api.moveDown());
+}
+
+api.resetLine = function(y) {
+  for(var i=0; i<api.base; i++) {
+    api.space[i][y] = null;
+  }
+}
+
+api.copyLine = function(origin, target) {
+  for(var i=0; i<api.base; i++) {
+    api.space[i][target] = api.space[i][origin];
+  }
+}
+
+api.checkLine = function(j) {
+  for(var i=0; i<api.base; i++) {
+    if(api.space[i][j] == null) {
+      return false;
+    }
+  }
+  return true;
+}
+
+api.lines = function() {
+  var last = api.height-1;
+  var deltas = [];
+  var delta = 0;
+  for(var y=last; y>=0; y--) {
+    var complete = api.checkLine(y);
+    if(complete) {
+      deltas[y] = 0;
+      delta++;
+    } else {
+      deltas[y] = delta;
+    }
+  }
+  if(delta > 0) {
+    for(var y=last; y>=0; y--) {
+      var inc = deltas[y];
+      if(inc > 0) {
+        api.copyLine(y, y+inc);
+      }
+    }
+    for(var y=0; y<delta; y++) {
+      api.resetLine(y);
+    }
+    api.reDrawLines();
+  }
+}
+
+api.points2 = function(f) {
+  if(f == null) return [];
+  return f(api.position.x, api.position.y);
+}
+
+api.canRotateRight = function(f) {
+  return api.checkPoints2(api.points2(f), function(p) {
+    return( true
+      && (p[1] < api.height)
+      && (p[0] < api.base)
+      && (p[0] >= 0)
+      && (api.space[p[0]][p[1]] == null)
+    ); } );
+}
+
+api.rotateRight = function(context) {
+  var nextRotation = api.nextRotation();
+  var nextFigure = api.figures[api.type][nextRotation];
+  if(api.canRotateRight(nextFigure)) {
+    api.erase();
+    api.rotation = nextRotation;
+    api.figure = nextFigure;
+    api.draw();
+  }
+}
+
+api.loop = function() {
+  api.tick();
+  if(!api.over && !api.paused) {
+    api.schedule();
+  }
+}
+
+api.schedule = function() {
+  api.timeout = window.setTimeout(function() {
+    api.loop();
+  }, api.delay);
+}
+
+api.pause = function() {
+  api.paused = true;
+  window.clearTimeout(api.timeout);
+}
+
+api.resume = function() {
+  api.paused = false;
+  api.schedule();
+}
+
+api.pauseOrResume = function() {
+  if(!api.paused) {
+    api.pause();
+  } else {
+    api.resume();
+  }
+}
+
+function main() {
+  var canvas = document.getElementById("canvas2d");
+  var context = canvas.getContext("2d");
+  api.context = context;
+  api.initialize();
+  api.loop();
+}
+
+function action() {
+  switch(event.keyCode) {
+    case 81:
+      api.moveDownLoop();
+      break;
+    case 80:
+      api.pauseOrResume();
+      break;
+    case 37:
+      api.moveLeft();
+      break;
+    case 39:
+      api.moveRight();
+      break;
+    case 40:
+      api.moveDown();
+      break;
+    case 38:
+    case 32:
+      api.rotateRight();
+      break;
+    default: console.log(event.keyCode);
+  }
+}
+</script>
+</head>
+<body onload="main()" onkeydown="action()">
+<canvas id="canvas2d" width="200" height="600" style="border: 1px solid silver">
+</canvas>
+</body>
+</html>
