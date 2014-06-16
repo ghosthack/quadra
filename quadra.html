@@ -2,6 +2,7 @@
 <html>
 <head lang="en">
 <meta charset="UTF-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
 <title>tris</title>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -13,6 +14,7 @@
   ga('send', 'pageview');
 
 </script>
+
 <script type="text/javascript">
 console.log("Welcome!");
 
@@ -46,44 +48,44 @@ var api = {
 };
 
 api.figures = [
-  [ function(x,y) { return [[x+0,y+0],[x+1,y+1],[x+1,y+0],[x+0,y+1]]; },
-    function(x,y) { return [[x+0,y+0],[x+1,y+1],[x+1,y+0],[x+0,y+1]]; },
-    function(x,y) { return [[x+0,y+0],[x+1,y+1],[x+1,y+0],[x+0,y+1]]; },
-    function(x,y) { return [[x+0,y+0],[x+1,y+1],[x+1,y+0],[x+0,y+1]]; },
+  [ function(x,y) { return [[x,y],[x+1,y+1],[x+1,y+0],[x+0,y+1]]; },
+    function(x,y) { return [[x,y],[x+1,y+1],[x+1,y+0],[x+0,y+1]]; },
+    function(x,y) { return [[x,y],[x+1,y+1],[x+1,y+0],[x+0,y+1]]; },
+    function(x,y) { return [[x,y],[x+1,y+1],[x+1,y+0],[x+0,y+1]]; },
   ],
-  [ function(x,y) { return [[x+0,y+0],[x-1,y+0],[x+1,y+0],[x+1,y+1]]; },
-    function(x,y) { return [[x+0,y+0],[x+0,y-1],[x+0,y+1],[x-1,y+1]]; },
-    function(x,y) { return [[x+0,y+0],[x-1,y+0],[x+1,y+0],[x-1,y-1]]; },
-    function(x,y) { return [[x+0,y+0],[x+0,y-1],[x+0,y+1],[x+1,y-1]]; },
+  [ function(x,y) { return [[x,y],[x-1,y+0],[x+1,y+0],[x+1,y+1]]; },
+    function(x,y) { return [[x,y],[x+0,y-1],[x+0,y+1],[x-1,y+1]]; },
+    function(x,y) { return [[x,y],[x-1,y+0],[x+1,y+0],[x-1,y-1]]; },
+    function(x,y) { return [[x,y],[x+0,y-1],[x+0,y+1],[x+1,y-1]]; },
   ],
-  [ function(x,y) { return [[x+0,y+0],[x+0,y-1],[x+0,y+1],[x+0,y+2]]; },
-    function(x,y) { return [[x+0,y+0],[x+1,y+0],[x-1,y+0],[x-2,y+0]]; },
-    function(x,y) { return [[x+0,y+0],[x+0,y-1],[x+0,y+1],[x+0,y-2]]; },
-    function(x,y) { return [[x+0,y+0],[x+1,y+0],[x-1,y+0],[x+2,y+0]]; },
+  [ function(x,y) { return [[x,y],[x+0,y-1],[x+0,y+1],[x+0,y+2]]; },
+    function(x,y) { return [[x,y],[x+1,y+0],[x-1,y+0],[x-2,y+0]]; },
+    function(x,y) { return [[x,y],[x+0,y-1],[x+0,y+1],[x+0,y-2]]; },
+    function(x,y) { return [[x,y],[x+1,y+0],[x-1,y+0],[x+2,y+0]]; },
   ],
   //T
-  [ function(x,y) { return [[x+0,y+0],[x-1,y+0],[x+1,y+0],[x+0,y+1]]; },
-    function(x,y) { return [[x+0,y+0],[x+0,y-1],[x+0,y+1],[x-1,y+0]]; },
-    function(x,y) { return [[x+0,y+0],[x-1,y+0],[x+1,y+0],[x+0,y-1]]; },
-    function(x,y) { return [[x+0,y+0],[x+0,y-1],[x+0,y+1],[x+1,y+0]]; },
+  [ function(x,y) { return [[x,y],[x-1,y+0],[x+1,y+0],[x+0,y+1]]; },
+    function(x,y) { return [[x,y],[x+0,y-1],[x+0,y+1],[x-1,y+0]]; },
+    function(x,y) { return [[x,y],[x-1,y+0],[x+1,y+0],[x+0,y-1]]; },
+    function(x,y) { return [[x,y],[x+0,y-1],[x+0,y+1],[x+1,y+0]]; },
   ],
   //L
-  [ function(x,y) { return [[x+0,y+0],[x-1,y+0],[x+1,y+0],[x+1,y-1]]; },
-    function(x,y) { return [[x+0,y+0],[x+0,y-1],[x+0,y+1],[x+1,y+1]]; },
-    function(x,y) { return [[x+0,y+0],[x-1,y+0],[x+1,y+0],[x-1,y+1]]; },
-    function(x,y) { return [[x+0,y+0],[x+0,y-1],[x+0,y+1],[x-1,y-1]]; },
+  [ function(x,y) { return [[x,y],[x-1,y+0],[x+1,y+0],[x+1,y-1]]; },
+    function(x,y) { return [[x,y],[x+0,y-1],[x+0,y+1],[x+1,y+1]]; },
+    function(x,y) { return [[x,y],[x-1,y+0],[x+1,y+0],[x-1,y+1]]; },
+    function(x,y) { return [[x,y],[x+0,y-1],[x+0,y+1],[x-1,y-1]]; },
   ],
   //S
-  [ function(x,y) { return [[x+0,y+0],[x+0,y+1],[x-1,y+1],[x+1,y+0]]; },
-    function(x,y) { return [[x+0,y+0],[x-1,y-1],[x-1,y+0],[x+0,y+1]]; },
-    function(x,y) { return [[x+0,y+0],[x+0,y+1],[x-1,y+1],[x+1,y+0]]; },
-    function(x,y) { return [[x+0,y+0],[x-1,y-1],[x-1,y+0],[x+0,y+1]]; },
+  [ function(x,y) { return [[x,y],[x+0,y+1],[x-1,y+1],[x+1,y+0]]; },
+    function(x,y) { return [[x,y],[x-1,y-1],[x-1,y+0],[x+0,y+1]]; },
+    function(x,y) { return [[x,y],[x+0,y+1],[x-1,y+1],[x+1,y+0]]; },
+    function(x,y) { return [[x,y],[x-1,y-1],[x-1,y+0],[x+0,y+1]]; },
   ],
   //Z
-  [ function(x,y) { return [[x+0,y+0],[x+1,y+1],[x+0,y+1],[x-1,y+0]]; },
-    function(x,y) { return [[x+0,y+0],[x+0,y+1],[x+1,y+0],[x+1,y-1]]; },
-    function(x,y) { return [[x+0,y+0],[x+1,y+1],[x+0,y+1],[x-1,y+0]]; },
-    function(x,y) { return [[x+0,y+0],[x+0,y+1],[x+1,y+0],[x+1,y-1]]; },
+  [ function(x,y) { return [[x,y],[x+1,y+1],[x+0,y+1],[x-1,y+0]]; },
+    function(x,y) { return [[x,y],[x+0,y+1],[x+1,y+0],[x+1,y-1]]; },
+    function(x,y) { return [[x,y],[x+1,y+1],[x+0,y+1],[x-1,y+0]]; },
+    function(x,y) { return [[x,y],[x+0,y+1],[x+1,y+0],[x+1,y-1]]; },
   ],
 ];
 
@@ -361,11 +363,42 @@ api.pauseOrResume = function() {
 function main() {
   var canvas = document.getElementById("canvas2d");
   var context = canvas.getContext("2d");
-  var body = document.getElementById("body2d");
-  // body.addEventListener('touchstart', function() {
-  //   console.log(event);
-  //   event.preventDefault();
-  // }, false);
+  var div = document.getElementById("div2d");
+  document.body.addEventListener('touchstart', function(event) {
+    //document.body.style.backgroundColor="red";
+if(event) {
+  if(event.x && event.y) {
+    div.appendChild(document.createTextNode("123456"));
+    if(event.y > window.innerHeight/2) {
+      if(event.x > window.innerWidth/2) {
+        api.moveRight();
+      } else {
+        api.moveLeft();
+      }
+    } else {
+      api.rotateRight();
+    }
+    event.preventDefault();
+
+  } else {
+    var touch = event.touches[0];
+    if(touch.pageY > window.innerHeight/2) {
+      if(touch.pageX > window.innerWidth/2) {
+        api.moveRight();
+      } else {
+        api.moveLeft();
+      }
+    } else {
+      api.rotateRight();
+    }
+    event.preventDefault();
+    //event.stopPropagation();
+  }
+} else {
+  //doesn't happen
+}
+  }, false);
+
   var w = window.innerWidth-10;
   var h = window.innerHeight-10;
   var s1 = Math.floor(w/api.base);
@@ -420,9 +453,8 @@ function keyAction() {
 </script>
 </head>
 <body id="body2d" onload="main()" onclick="mouseAction()" onkeydown="keyAction()" style="padding: 0; margin: 0; background: silver">
+<div id="div2d" style="position:absolute; top:0; left:0;"></div>
 <canvas id="canvas2d" width="200" height="600" style="border: 0; padding: 0; margin: auto; display: block; background-color: white;">
 </canvas>
 </body>
 </html>
-
-
