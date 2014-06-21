@@ -105,13 +105,8 @@ api.randomFigure = function() {
 
 api.spawner.newFigure = function() {
   //pick a random figure!
-  if(api.nextType == null) {
-    api.type = api.randomFigure();
-    api.nextType = api.randomFigure();
-  } else {
-    api.type = api.nextType;
-    api.nextType = api.randomFigure();
-  }
+  api.type = api.nextType;
+  api.nextType = api.randomFigure();
   api.figure = api.figures[api.type][0];
   //place it in line 0, 50%
   api.position.x = api.base/2-1;
@@ -169,7 +164,7 @@ api.draw = function() {
   });
 }
 
-api.drawNext = function() {
+api.reDrawNext = function() {
   api.eraseArea(api.base+1, 0, 5, 4, "white");
   api.context.fillStyle = api.typeColor[api.nextType];
   api.forPoints2(api.nextPoints(api.base+3,1), function(p) {
@@ -185,9 +180,8 @@ api.gy = function() {
 }
 
 api.initialize = function() {
-  api.eraseArea(api.base, 0, 6, api.height, "silver");
-  api.eraseArea(api.base+1, 0, 5, 4, "white");
-  api.reDrawScore();
+  api.type = api.randomFigure();
+  api.nextType = api.randomFigure();
   for(var i=0; i<api.base; i++) {
     api.space[i] = [];
     for(var j=0; j<api.height; j++) {
@@ -196,6 +190,9 @@ api.initialize = function() {
   }
   api.spawner.newFigure();
   api.loop();
+  api.eraseArea(api.base, 0, 6, api.height, "silver");
+  api.reDrawScore();
+  api.reDrawNext();
 }
 
 api.tick = function() {
@@ -276,7 +273,7 @@ api.moveDown = function(context) {
       api.processLines();
       api.spawner.newFigure();
       api.draw();
-      api.drawNext();
+      api.reDrawNext();
 
     } else {
       console.log("Game Over")
@@ -350,17 +347,14 @@ api.reDrawScore = function() {
   api.eraseArea(api.base+1, 8+5, 5, 3, "white");
 
   api.context.fillStyle = "black";
-  api.context.font = "bold 12px sans-serif";
-  api.context.fillText("SCORE", (2+api.base)*api.size, 6*api.size);
-  api.context.fillText(api.score, (2+api.base)*api.size, 7*api.size);
-  api.context.fillStyle = "black";
-  api.context.font = "bold 12px sans-serif";
-  api.context.fillText("LINES", (2+api.base)*api.size, (4+6)*api.size);
-  api.context.fillText(api.lines, (2+api.base)*api.size, (4+7)*api.size);
-  api.context.fillStyle = "black";
-  api.context.font = "bold 12px sans-serif";
-  api.context.fillText("LEVEL", (2+api.base)*api.size, (8+6)*api.size);
-  api.context.fillText(api.level, (2+api.base)*api.size, (8+7)*api.size);
+  var size = 6;
+  api.context.font = "bold 17px sans-serif";
+  api.context.fillText("SCORE", (2+api.base)*api.size, 6*api.size+size);
+  api.context.fillText(api.score, (2+api.base)*api.size, 7*api.size+size);
+  api.context.fillText("LINES", (2+api.base)*api.size, (4+6)*api.size+size);
+  api.context.fillText(api.lines, (2+api.base)*api.size, (4+7)*api.size+size);
+  api.context.fillText("LEVEL", (2+api.base)*api.size, (8+6)*api.size+size);
+  api.context.fillText(api.level, (2+api.base)*api.size, (8+7)*api.size+size);
 }
 
 api.points2 = function(f) {
