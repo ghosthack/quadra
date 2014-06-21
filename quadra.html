@@ -19,19 +19,23 @@
 console.log("Welcome!");
 
 var api = {
-  delay: 500,
+  level: 1,
+  lines: 0,
+  score: 0,
+  delay: 400,
   size: 20,
   paused: false,
   over: false,
   timeout: null,
   context: null,
   base: 10,
-  height: 30,
+  height: 25,
   space: [],
   spawner: {newFigure: null},
   position: {x:0, y:0},
   rotation: 0,
   type: 0,
+  nextType: null,
   typeColor: ["pink", "cyan", "red", "yellow", "blue", "orange", "green", "black"],
   figure: null,
   figures: [],
@@ -95,21 +99,42 @@ api.nextRotation = function() {
   return api.rotations[api.rotation];
 }
 
+api.randomFigure = function() {
+  return Math.floor(7*Math.random());
+};
+
 api.spawner.newFigure = function() {
   //pick a random figure!
-  api.type = Math.floor(7*Math.random());
-  //api.type = 6;
+  if(api.nextType == null) {
+    api.type = api.randomFigure();
+    api.nextType = api.randomFigure();
+  } else {
+    api.type = api.nextType;
+    api.nextType = api.randomFigure();
+  }
   api.figure = api.figures[api.type][0];
   //place it in line 0, 50%
   api.position.x = api.base/2-1;
   api.position.y = 0;
   //rotation 0
   api.rotation = 0;
+
+  // redraw next.
+}
+
+api.nextPoints = function(x, y) {
+  if(api.nextType == null) return [];
+  return api.figures[api.nextType][0](x, y);
 }
 
 api.erasePoint = function(x, y) {
   api.context.fillStyle = "white";
   api.context.fillRect(x*api.size, y*api.size, api.size, api.size);
+}
+
+api.eraseArea = function(x, y, sx, sy, color) {
+  api.context.fillStyle = color;
+  api.context.fillRect(x*api.size, y*api.size, sx*api.size, sy*api.size);
 }
 
 api.drawPoint = function(x, y, c) {
@@ -144,6 +169,14 @@ api.draw = function() {
   });
 }
 
+api.drawNext = function() {
+  api.eraseArea(api.base+1, 0, 5, 4, "white");
+  api.context.fillStyle = api.typeColor[api.nextType];
+  api.forPoints2(api.nextPoints(api.base+3,1), function(p) {
+    api.context.fillRect(p[0]*api.size, p[1]*api.size, api.size, api.size);
+  });
+}
+
 api.gx = function() {
   return api.position.x * api.size;
 }
@@ -152,6 +185,9 @@ api.gy = function() {
 }
 
 api.initialize = function() {
+  api.eraseArea(api.base, 0, 6, api.height, "silver");
+  api.eraseArea(api.base+1, 0, 5, 4, "white");
+  api.reDrawScore();
   for(var i=0; i<api.base; i++) {
     api.space[i] = [];
     for(var j=0; j<api.height; j++) {
@@ -237,9 +273,10 @@ api.moveDown = function(context) {
   } else {
     if(api.canAssignSpace()) {
       api.assignSpace();
-      api.lines();
+      api.processLines();
       api.spawner.newFigure();
       api.draw();
+      api.drawNext();
 
     } else {
       console.log("Game Over")
@@ -276,7 +313,7 @@ api.checkLine = function(j) {
   return true;
 }
 
-api.lines = function() {
+api.processLines = function() {
   var last = api.height-1;
   var deltas = [];
   var delta = 0;
@@ -300,7 +337,30 @@ api.lines = function() {
       api.resetLine(y);
     }
     api.reDrawLines();
+    api.score += Math.pow(delta,4);
+    api.lines += delta;
+    api.level = Math.ceil(api.lines / 4);
+    api.reDrawScore();
   }
+}
+
+api.reDrawScore = function() {
+  api.eraseArea(api.base+1, 5, 5, 3, "white");
+  api.eraseArea(api.base+1, 4+5, 5, 3, "white");
+  api.eraseArea(api.base+1, 8+5, 5, 3, "white");
+
+  api.context.fillStyle = "black";
+  api.context.font = "bold 12px sans-serif";
+  api.context.fillText("SCORE", (2+api.base)*api.size, 6*api.size);
+  api.context.fillText(api.score, (2+api.base)*api.size, 7*api.size);
+  api.context.fillStyle = "black";
+  api.context.font = "bold 12px sans-serif";
+  api.context.fillText("LINES", (2+api.base)*api.size, (4+6)*api.size);
+  api.context.fillText(api.lines, (2+api.base)*api.size, (4+7)*api.size);
+  api.context.fillStyle = "black";
+  api.context.font = "bold 12px sans-serif";
+  api.context.fillText("LEVEL", (2+api.base)*api.size, (8+6)*api.size);
+  api.context.fillText(api.level, (2+api.base)*api.size, (8+7)*api.size);
 }
 
 api.points2 = function(f) {
@@ -339,7 +399,7 @@ api.loop = function() {
 api.schedule = function() {
   api.timeout = window.setTimeout(function() {
     api.loop();
-  }, api.delay);
+  }, (api.delay-api.level*10) );
 }
 
 api.pause = function() {
@@ -360,59 +420,8 @@ api.pauseOrResume = function() {
   }
 }
 
-function main() {
-  var canvas = document.getElementById("canvas2d");
-  var context = canvas.getContext("2d");
-  var div = document.getElementById("div2d");
-  document.body.addEventListener('touchstart', function(event) {
-    //document.body.style.backgroundColor="red";
-if(event) {
-  if(event.x && event.y) {
-    div.appendChild(document.createTextNode("123456"));
-    if(event.y > window.innerHeight/2) {
-      if(event.x > window.innerWidth/2) {
-        api.moveRight();
-      } else {
-        api.moveLeft();
-      }
-    } else {
-      api.rotateRight();
-    }
-    event.preventDefault();
-
-  } else {
-    var touch = event.touches[0];
-    if(touch.pageY > window.innerHeight/2) {
-      if(touch.pageX > window.innerWidth/2) {
-        api.moveRight();
-      } else {
-        api.moveLeft();
-      }
-    } else {
-      api.rotateRight();
-    }
-    event.preventDefault();
-    //event.stopPropagation();
-  }
-} else {
-  //doesn't happen
-}
-  }, false);
-
-  var w = window.innerWidth-10;
-  var h = window.innerHeight-10;
-  var s1 = Math.floor(w/api.base);
-  var s2 = Math.floor(h/api.height);
-  api.size = Math.min(s1, s2);
-  canvas.width = api.base * api.size;
-  canvas.height = api.height * api.size;
-  api.context = context;
-  api.initialize();
-}
-
-function mouseAction() {
+function touchEvent(event) {
   if(event) {
-    event.preventDefault();
     if(event.x && event.y) {
       if(event.y > window.innerHeight/2) {
         if(event.x > window.innerWidth/2) {
@@ -423,9 +432,46 @@ function mouseAction() {
       } else {
         api.rotateRight();
       }
+      event.preventDefault();
+
+    } else if(event.touches) {
+      var touch = event.touches[0];
+      if(touch.pageY > window.innerHeight/2) {
+        if(touch.pageX > window.innerWidth/2) {
+          api.moveRight();
+        } else {
+          api.moveLeft();
+        }
+      } else {
+        api.rotateRight();
+      }
+      event.preventDefault();
+      //event.stopPropagation();
     }
+  } else {
+    //doesn't happen
   }
 }
+
+function main() {
+  var canvas = document.getElementById("canvas2d");
+  var context = canvas.getContext("2d");
+  document.body.addEventListener('touchstart', touchEvent, false);
+  document.body.addEventListener('click', touchEvent, false);
+
+  var w = window.innerWidth-10;
+  var h = window.innerHeight-10;
+  var base = api.base + 6;
+  //var base = api.base;
+  var s1 = Math.floor(w/base);
+  var s2 = Math.floor(h/api.height);
+  api.size = Math.min(s1, s2);
+  canvas.width = base * api.size;
+  canvas.height = api.height * api.size;
+  api.context = context;
+  api.initialize();
+}
+
 function keyAction() {
   switch(event.keyCode) {
     case 81:
@@ -450,11 +496,12 @@ function keyAction() {
     default: console.log(event.keyCode);
   }
 }
+
 </script>
 </head>
-<body id="body2d" onload="main()" onclick="mouseAction()" onkeydown="keyAction()" style="padding: 0; margin: 0; background: silver">
+<body id="body2d" onload="main()" onkeydown="keyAction()" style="padding: 0; margin: 0; background: silver">
 <div id="div2d" style="position:absolute; top:0; left:0;"></div>
-<canvas id="canvas2d" width="200" height="600" style="border: 0; padding: 0; margin: auto; display: block; background-color: white;">
+<canvas id="canvas2d" width="1" height="1" style="border: 0; padding: 0; margin: auto; display: block; background-color: white;">
 </canvas>
 </body>
 </html>
