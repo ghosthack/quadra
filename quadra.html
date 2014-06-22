@@ -22,6 +22,7 @@ var api = {
   level: 1,
   lines: 0,
   score: 0,
+  initialDelay: 400,
   delay: 400,
   size: 20,
   paused: false,
@@ -182,6 +183,11 @@ api.gy = function() {
 }
 
 api.initialize = function() {
+  api.eraseArea(0, 0, api.base, api.height, "white");
+  api.score = 0;
+  api.lines = 0;
+  api.level = 1;
+  api.delay = api.initialDelay;
   api.type = api.randomFigure();
   api.nextType = api.randomFigure();
   for(var i=0; i<api.base; i++) {
@@ -486,6 +492,9 @@ function keyAction() {
       break;
     case 40:
       api.moveDown();
+      break;
+    case 82:
+      api.initialize();
       break;
     case 38:
     case 32:
