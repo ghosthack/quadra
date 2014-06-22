@@ -125,12 +125,11 @@ api.nextPoints = function(x, y) {
   return api.figures[api.nextType][0](x, y);
 }
 
-api.erasePoint = function(x, y) {
-  api.context.fillStyle = "white";
-  api.context.fillRect(x*api.size, y*api.size, api.size, api.size);
+api.clearPoint = function(x, y) {
+  api.context.clearRect(x*api.size, y*api.size, api.size, api.size);
 }
 
-api.eraseArea = function(x, y, sx, sy, color) {
+api.paintArea = function(x, y, sx, sy, color) {
   api.context.fillStyle = color;
   api.context.fillRect(x*api.size, y*api.size, sx*api.size, sy*api.size);
 }
@@ -145,7 +144,7 @@ api.reDrawLines = function() {
     for(var i=0; i<api.base; i++) {
       var p = api.space[i][j];
       if(p == null)  {
-        api.erasePoint(i,j);
+        api.clearPoint(i,j);
       } else {
         api.drawPoint(i,j,p);
       }
@@ -154,9 +153,8 @@ api.reDrawLines = function() {
 }
 
 api.erase = function() {
-  api.context.fillStyle = "white";
   api.forPoints2(api.points(), function(p) {
-    api.context.fillRect(p[0]*api.size, p[1]*api.size, api.size, api.size);
+    api.context.clearRect(p[0]*api.size, p[1]*api.size, api.size, api.size);
   });
 }
 
@@ -168,7 +166,7 @@ api.draw = function() {
 }
 
 api.reDrawNext = function() {
-  api.eraseArea(api.base+1, 0, 5, 4, "white");
+  api.clear(api.base+1, 0, 5, 4);
   api.context.fillStyle = api.typeColor[api.nextType];
   api.forPoints2(api.nextPoints(api.base+3,1), function(p) {
     api.context.fillRect(p[0]*api.size, p[1]*api.size, api.size, api.size);
@@ -183,7 +181,10 @@ api.gy = function() {
 }
 
 api.initialize = function() {
-  api.eraseArea(0, 0, api.base, api.height, "white");
+  api.clearTimeout();
+  api.clear(0, 0, api.base, api.height);
+  api.over = false;
+  api.paused = false;
   api.score = 0;
   api.lines = 0;
   api.level = 1;
@@ -198,7 +199,7 @@ api.initialize = function() {
   }
   api.spawner.newFigure();
   api.loop();
-  api.eraseArea(api.base, 0, 6, api.height, "silver");
+  api.paintArea(api.base, 0, 6, api.height, "silver");
   api.reDrawScore();
   api.reDrawNext();
 }
@@ -350,10 +351,14 @@ api.processLines = function() {
   }
 }
 
+api.clear = function(x,y,dx,dy) {
+  api.context.clearRect(x*api.size, y*api.size, dx*api.size, dy*api.size);
+}
+
 api.reDrawScore = function() {
-  api.eraseArea(api.base+1, 5, 5, 3, "white");
-  api.eraseArea(api.base+1, 4+5, 5, 3, "white");
-  api.eraseArea(api.base+1, 8+5, 5, 3, "white");
+  api.clear(api.base+1, 5, 5, 3);
+  api.clear(api.base+1, 4+5, 5, 3);
+  api.clear(api.base+1, 8+5, 5, 3);
 
   api.context.fillStyle = "silver";
   var size = 6;
@@ -405,9 +410,16 @@ api.schedule = function() {
   }, (api.delay-api.level*10) );
 }
 
+api.clearTimeout = function() {
+  if(api.timeout != null) {
+    window.clearTimeout(api.timeout);
+    api.timeout = null;
+  }
+}
+
 api.pause = function() {
   api.paused = true;
-  window.clearTimeout(api.timeout);
+  api.clearTimeout();
 }
 
 api.resume = function() {
