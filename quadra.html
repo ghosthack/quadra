@@ -37,6 +37,8 @@ var api = {
   type: 0,
   nextType: null,
   typeColor: ["pink", "cyan", "red", "yellow", "blue", "orange", "green", "black"],
+//  typeColor: ["silver","silver","silver","silver","silver","silver","silver","silver",],
+//  typeColor: ["gray","gray","gray","gray","gray","gray","gray","gray",],
   figure: null,
   figures: [],
   tick: null,
@@ -272,9 +274,10 @@ api.moveDown = function(context) {
       api.assignSpace();
       api.processLines();
       api.spawner.newFigure();
-      api.draw();
       api.reDrawNext();
-
+      if(api.canAssignSpace()) {
+        api.draw();
+      }
     } else {
       console.log("Game Over")
       api.over = true;
@@ -346,7 +349,7 @@ api.reDrawScore = function() {
   api.eraseArea(api.base+1, 4+5, 5, 3, "white");
   api.eraseArea(api.base+1, 8+5, 5, 3, "white");
 
-  api.context.fillStyle = "black";
+  api.context.fillStyle = "silver";
   var size = 6;
   api.context.font = "bold 17px sans-serif";
   api.context.fillText("SCORE", (2+api.base)*api.size, 6*api.size+size);
@@ -450,6 +453,7 @@ function touchEvent(event) {
 function main() {
   var canvas = document.getElementById("canvas2d");
   var context = canvas.getContext("2d");
+  context.scale(10,10);
   document.body.addEventListener('touchstart', touchEvent, false);
   document.body.addEventListener('click', touchEvent, false);
 
