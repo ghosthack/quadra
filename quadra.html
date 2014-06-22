@@ -198,10 +198,10 @@ api.initialize = function() {
     }
   }
   api.spawner.newFigure();
-  api.loop();
   api.paintArea(api.base, 0, 6, api.height, "silver");
   api.reDrawScore();
   api.reDrawNext();
+  api.loop();
 }
 
 api.tick = function() {
@@ -405,9 +405,7 @@ api.loop = function() {
 }
 
 api.schedule = function() {
-  api.timeout = window.setTimeout(function() {
-    api.loop();
-  }, (api.delay-api.level*10) );
+  api.timeout = window.setTimeout(api.loop, api.delay-api.level*10);
 }
 
 api.clearTimeout = function() {
