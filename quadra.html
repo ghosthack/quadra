@@ -240,7 +240,7 @@ api.moveLeft = function() {
   }
 };
 
-api.moveRight = function(context) {
+api.moveRight = function() {
   if(api.checkPoints2(api.points(), function(p) {
     return ( (p[0]+1 < api.base)
              && (api.space[p[0]+1][p[1]] == null)
@@ -270,7 +270,7 @@ api.assignSpace = function() {
   });
 }
 
-api.moveDown = function(context) {
+api.moveDown = function() {
   if(api.canMoveDown()) {
     api.erase();
     api.position.y = api.position.y+1;
@@ -295,7 +295,7 @@ api.moveDown = function(context) {
   // TODO draw should be here
 }
 
-api.moveDownLoop = function(context) {
+api.moveDownLoop = function() {
   while(api.moveDown());
 }
 
@@ -386,7 +386,7 @@ api.canRotateRight = function(f) {
     ); } );
 }
 
-api.rotateRight = function(context) {
+api.rotateRight = function() {
   var nextRotation = api.nextRotation();
   var nextFigure = api.figures[api.type][nextRotation];
   if(api.canRotateRight(nextFigure)) {
@@ -471,7 +471,6 @@ function touchEvent(event) {
 function main() {
   var canvas = document.getElementById("canvas2d");
   var context = canvas.getContext("2d");
-  context.scale(10,10);
   document.body.addEventListener('touchstart', touchEvent, false);
   document.body.addEventListener('click', touchEvent, false);
 
