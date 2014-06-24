@@ -369,6 +369,7 @@ api.reDrawScore = function() {
   api.context.fillText(api.lines, (2+api.base)*api.size, (4+7)*api.size+size);
   api.context.fillText("LEVEL", (2+api.base)*api.size, (8+6)*api.size+size);
   api.context.fillText(api.level, (2+api.base)*api.size, (8+7)*api.size+size);
+  updateTweet();
 }
 
 api.points2 = function(f) {
@@ -483,6 +484,29 @@ function main() {
   canvas.height = api.height * api.size;
   api.context = context;
   api.initialize();
+  twitterjs(document, 'script', 'twitter-wjs')
+
+}
+
+twitterjs = function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}};
+
+updateTweet = function() {
+  var generated = document.getElementById('a-tweet');
+  generated.parentElement.removeChild(generated);
+
+  var a = document.createElement('a');
+  a.setAttribute('id', 'a-tweet');
+  a.setAttribute('href', "https://twitter.com/intent/tweet?button_hashtag=quadraScore&text=Scored%20" +api.score+ "!");
+  a.setAttribute('class', 'twitter-hashtag-button');
+  a.setAttribute('data-size', 'large');
+  a.setAttribute('data-url', 'http://quadra.ghosthack.com');
+
+  document.getElementById('div-tweet').appendChild(a);
+
+  try {
+    twttr.widgets.load();
+  }catch(e) {}
+
 }
 
 function keyAction() {
@@ -516,8 +540,12 @@ function keyAction() {
 </script>
 </head>
 <body id="body2d" onload="main()" onkeydown="keyAction()" style="padding: 0; margin: 0; background: silver">
-<div id="div2d" style="position:absolute; top:0; left:0;"></div>
+
+<div id="div-tweet" style="position:absolute; top:0; left:0;"><a id="a-tweet" style="visibility:hidden" href="https://twitter.com/intent/tweet?button_hashtag=quadraScore&text=Play!"
+  class="twitter-hashtag-button" data-size="large" data-url="http://quadra.ghosthack.com">Tweet #quadraScore</a></div>
+
 <canvas id="canvas2d" width="1" height="1" style="border: 0; padding: 0; margin: auto; display: block; background-color: white;">
 </canvas>
+
 </body>
 </html>
